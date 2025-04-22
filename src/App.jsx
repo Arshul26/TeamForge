@@ -1,13 +1,16 @@
-import { Button, Box, Text, VStack } from '@chakra-ui/react';
+// src/App.jsx
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import AuthPage from '../AuthPage'; // Import AuthPage from src folder
+import Dashboard from './Dashboard'; // Import Dashboard from src folder
 
 function App() {
   return (
-    <Box minH="100vh" display="flex" justifyContent="center" alignItems="center" bg="gray.50">
-      <VStack spacing={4}>
-        <Text fontSize="2xl" color="teal.500">🚀 HackLink with Chakra UI</Text>
-        <Button colorScheme="teal">Let’s Go!</Button>
-      </VStack>
-    </Box>
+    <Router>
+      <Routes>
+        <Route path="/" element={<AuthPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+    </Router>
   );
 }
 
