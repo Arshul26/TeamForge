@@ -2,28 +2,34 @@
 import React, { useState } from 'react';
 import { auth } from './firebase'; // Firebase Auth
 import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { Box, Input, Button, Heading, FormControl, FormLabel, Text } from '@chakra-ui/react';
 
 export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  // Handle the login logic
-  const handleLogin = async () => {
+  const handleAuth = async () => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate('/dashboard'); // Redirect to the dashboard on successful login
-    } catch (error) {
-      setError('Invalid credentials. Please try again.');
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
+      } else {
+        await createUserWithEmailAndPassword(auth, email, password);
+      }
+      navigate('/dashboard'); // Go to dashboard on success
+    } catch (err) {
+      setError(err.message);
     }
   };
 
   return (
-    <Box p={8}>
-      <Heading mb={4}>Login</Heading>
+    <Box p={8} maxW="400px" mx="auto" mt="10">
+      <Heading mb={6} textAlign="center">
+        {isLogin ? 'Login' : 'Sign Up'}
+      </Heading>
       {error && <Text color="red.500" mb={4}>{error}</Text>}
       <FormControl mb={4}>
         <FormLabel>Email</FormLabel>
@@ -43,7 +49,19 @@ export default function AuthPage() {
           required
         />
       </FormControl>
-      <Button onClick={handleLogin}>Login</Button>
+      <Button onClick={handleAuth} width="100%" colorScheme="teal" mb={4}>
+        {isLogin ? 'Login' : 'Sign Up'}
+      </Button>
+      <Text textAlign="center">
+        {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
+        <Button
+          variant="link"
+          colorScheme="blue"
+          onClick={() => setIsLogin(!isLogin)}
+        >
+          {isLogin ? 'Sign Up' : 'Login'}
+        </Button>
+      </Text>
     </Box>
   );
 }

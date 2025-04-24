@@ -1,47 +1,33 @@
-import React, { useState, useEffect } from "react";
-import { db } from "../firebase"; // Make sure you're importing your db instance correctly
-import { doc, getDoc } from "firebase/firestore"; // Import getDoc and doc functions from firestore
+// src/pages/HackathonDetails.jsx
+import React from 'react';
+import { useLocation } from 'react-router-dom';
+import { Box, Heading, Text, Button } from '@chakra-ui/react';
 
-const HackathonDetails = ({ id }) => {
-  const [hackathon, setHackathon] = useState(null);
-  const [loading, setLoading] = useState(true);
+export default function HackathonDetails() {
+  const { state } = useLocation();
+  const hackathon = state?.hackathon;
 
-  useEffect(() => {
-    // Fetch data based on the document ID passed in the route
-    const fetchHackathonData = async () => {
-      try {
-        const docRef = doc(db, "hackathons", id); // Get the specific document by ID
-        const docSnap = await getDoc(docRef); // Fetch the document
-
-        if (docSnap.exists()) {
-          setHackathon(docSnap.data()); // Set the data from Firestore into state
-        } else {
-          console.log("No such document!");
-        }
-      } catch (error) {
-        console.error("Error fetching document: ", error);
-      } finally {
-        setLoading(false); // Set loading to false after the data is fetched
-      }
-    };
-
-    fetchHackathonData();
-  }, [id]); // Trigger when the component mounts or when id changes
-
-  if (loading) {
-    return <div>Loading details...</div>;
+  if (!hackathon) {
+    return <Text>No hackathon data available.</Text>;
   }
 
-  return (
-    <div>
-      <h2>Hackathon Details</h2>
-      <p><strong>Name:</strong> {hackathon?.Name || "Not Available"}</p>
-      <p><strong>Description:</strong> {hackathon?.Description || "Not Available"}</p>
-      <p><strong>Date:</strong> {hackathon?.Date || "Not Available"}</p>
-      <p><strong>Location:</strong> {hackathon?.Location || "Not Available"}</p>
-      <p><strong>Prize:</strong> {hackathon?.Prize || "Not Available"}</p>
-    </div>
-  );
-};
+  const handleRegisterNow = () => {
+    window.open(hackathon['Registration Link'], '_blank');
+  };
 
-export default HackathonDetails;
+  return (
+    <Box p={8}>
+      <Heading mb={4}>{hackathon['Hackathon Name'] || 'Name not available'}</Heading>
+      <Text fontWeight="bold">Date: {hackathon['Date'] || 'Not available'}</Text>
+      <Text>Location: {hackathon['Location'] || 'Not available'}</Text>
+      <Text>Theme: {hackathon['Theme'] || 'Not available'}</Text>
+      <Text>Organizer: {hackathon['Organizer'] || 'Not available'}</Text>
+      <Text>Prizes: {hackathon['Prizes'] || 'Not available'}</Text>
+      {hackathon['Registration Link'] && (
+        <Button onClick={handleRegisterNow} colorScheme="blue" mt={4}>
+          Register Now
+        </Button>
+      )}
+    </Box>
+  );
+}

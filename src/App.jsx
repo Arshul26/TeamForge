@@ -12,7 +12,7 @@ function App() {
       <Routes>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/hackathon-explorer" element={<HackathonExplorer />} />
-        <Route path="/hackathon-details/:id" element={<HackathonDetails />} />
+        <Route path="/hackathon-details" element={<HackathonDetails />} />
         <Route path="/profile" element={<ProfileDashboard />} />
         <Route path="/" element={<AuthPage />} /> {/* Default route for login */}
       </Routes>

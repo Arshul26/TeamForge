@@ -1,55 +1,46 @@
 // src/pages/HackathonExplorer.jsx
-import React, { useState, useEffect } from 'react';
-import { db } from '../firebase'; // Import db from firebase.js
-import { collection, getDocs } from 'firebase/firestore';
-import { Box, Heading, Button, VStack } from '@chakra-ui/react';
-import { Link } from 'react-router-dom'; // Import Link for navigation
+import React, { useEffect, useState } from 'react';
+import Papa from 'papaparse';
+import { Box, Heading, Text, Button, Stack } from '@chakra-ui/react';
+import { useNavigate } from 'react-router-dom';
 
-const HackathonExplorer = () => {
-  const [hackathons, setHackathons] = useState([]); // Store hackathon data
-  const [loading, setLoading] = useState(true);
+const S3_CSV_URL = 'https://teamforgedata.s3.us-east-1.amazonaws.com/2025_hackathons_updated.csv'; // Replace with actual S3 URL or presigned URL
+
+export default function HackathonExplorer() {
+  const [hackathons, setHackathons] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchHackathons = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'hackathons')); // Replace 'hackathons' with your Firestore collection name
-        const hackathonList = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setHackathons(hackathonList);
-      } catch (error) {
-        console.error('Error fetching hackathons:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    fetch(S3_CSV_URL)
+      .then(response => response.text())
+      .then(csv => {
+        Papa.parse(csv, {
+          header: true,
+          complete: (results) => {
+            setHackathons(results.data);
+          }
+        });
+      })
+      .catch(error => console.error("Error loading CSV:", error));
+  }, []);
 
-    fetchHackathons();
-  }, []); // Empty array means this runs once when component mounts
-
-  if (loading) {
-    return <Box>Loading hackathons...</Box>;
-  }
+  const handleViewDetails = (hackathon) => {
+    navigate('/hackathon-details', { state: { hackathon } });
+  };
 
   return (
-    <Box p={5}>
-      <Heading mb={6}>Hackathon Explorer</Heading>
-      <VStack spacing={4}>
-        {hackathons.map((hackathon) => (
-          <Box key={hackathon.id} borderWidth="1px" borderRadius="lg" p={4}>
-            <Heading size="md">{hackathon.name}</Heading> {/* Change to appropriate field */}
-            <p>{hackathon.description}</p> {/* Change to appropriate field */}
-            <Link to={`/hackathon-details/${hackathon.id}`}>
-              <Button colorScheme="teal" mt={4}>
-                View Details
-              </Button>
-            </Link>
+    <Box p={8}>
+      <Heading mb={6}>Upcoming Hackathons</Heading>
+      <Stack spacing={6}>
+        {hackathons.map((hackathon, idx) => (
+          <Box key={idx} p={4} shadow="md" borderWidth="1px" borderRadius="lg">
+            <Text fontWeight="bold">{hackathon['Hackathon Name'] || 'Name not available'}</Text>
+            <Text>Date: {hackathon['Date'] || 'Not available'}</Text>
+            <Text>Location: {hackathon['Location'] || 'Not available'}</Text>
+            <Button onClick={() => handleViewDetails(hackathon)} colorScheme="blue">View Details</Button>
           </Box>
         ))}
-      </VStack>
+      </Stack>
     </Box>
   );
-};
-
-export default HackathonExplorer;
+}
