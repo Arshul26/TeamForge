@@ -4,7 +4,9 @@ import Papa from 'papaparse';
 import { Box, Heading, Text, Button, Stack } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 
-const S3_CSV_URL = 'https://teamforgedata.s3.us-east-1.amazonaws.com/2025_hackathons_updated.csv'; // Replace with actual S3 URL or presigned URL
+import Navbar from '../components/Navbar';
+
+const S3_CSV_URL = 'https://teamforgedata.s3.us-east-1.amazonaws.com/2025_hackathons_updated.csv';
 
 export default function HackathonExplorer() {
   const [hackathons, setHackathons] = useState([]);
@@ -29,18 +31,21 @@ export default function HackathonExplorer() {
   };
 
   return (
-    <Box p={8}>
-      <Heading mb={6}>Upcoming Hackathons</Heading>
-      <Stack spacing={6}>
-        {hackathons.map((hackathon, idx) => (
-          <Box key={idx} p={4} shadow="md" borderWidth="1px" borderRadius="lg">
-            <Text fontWeight="bold">{hackathon['Hackathon Name'] || 'Name not available'}</Text>
-            <Text>Date: {hackathon['Date'] || 'Not available'}</Text>
-            <Text>Location: {hackathon['Location'] || 'Not available'}</Text>
-            <Button onClick={() => handleViewDetails(hackathon)} colorScheme="blue">View Details</Button>
-          </Box>
-        ))}
-      </Stack>
-    </Box>
+    <>
+      <Navbar />
+      <Box p={8}>
+        <Heading mb={6}>Upcoming Hackathons</Heading>
+        <Stack spacing={6}>
+          {hackathons.map((hackathon, idx) => (
+            <Box key={idx} p={4} shadow="md" borderWidth="1px" borderRadius="lg">
+              <Text fontWeight="bold">{hackathon['Hackathon Name'] || 'Name not available'}</Text>
+              <Text>Date: {hackathon['Date'] || 'Not available'}</Text>
+              <Text>Location: {hackathon['Location'] || 'Not available'}</Text>
+              <Button onClick={() => handleViewDetails(hackathon)} colorScheme="blue">View Details</Button>
+            </Box>
+          ))}
+        </Stack>
+      </Box>
+    </>
   );
 }
