@@ -1,9 +1,9 @@
-// src/pages/AuthPage.jsx
 import React, { useState } from 'react';
-import { auth } from './firebase'; // Firebase Auth
+import { auth, db } from './firebase'; // Firebase Auth and Firestore
 import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { Box, Input, Button, Heading, FormControl, FormLabel, Text } from '@chakra-ui/react';
+import { doc, setDoc } from 'firebase/firestore';
 
 export default function AuthPage() {
   const [email, setEmail] = useState('');
@@ -16,10 +16,14 @@ export default function AuthPage() {
     try {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
+        navigate('/dashboard'); // Go to dashboard on success
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
+        // Sign up with email and password
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+        // After successful sign up, redirect to the Create Profile page
+        navigate('/create-profile'); // Redirect to ProfileCreate page to complete profile
       }
-      navigate('/dashboard'); // Go to dashboard on success
     } catch (err) {
       setError(err.message);
     }
@@ -31,6 +35,8 @@ export default function AuthPage() {
         {isLogin ? 'Login' : 'Sign Up'}
       </Heading>
       {error && <Text color="red.500" mb={4}>{error}</Text>}
+
+      {/* Email Input */}
       <FormControl mb={4}>
         <FormLabel>Email</FormLabel>
         <Input
@@ -40,6 +46,8 @@ export default function AuthPage() {
           required
         />
       </FormControl>
+
+      {/* Password Input */}
       <FormControl mb={4}>
         <FormLabel>Password</FormLabel>
         <Input
@@ -49,9 +57,12 @@ export default function AuthPage() {
           required
         />
       </FormControl>
+
       <Button onClick={handleAuth} width="100%" colorScheme="teal" mb={4}>
         {isLogin ? 'Login' : 'Sign Up'}
       </Button>
+
+      {/* Toggle between Login and Sign Up */}
       <Text textAlign="center">
         {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
         <Button
