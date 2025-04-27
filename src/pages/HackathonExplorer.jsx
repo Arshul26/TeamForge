@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import Papa from 'papaparse';
 import { Box, Heading, Text, Button, Stack } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-
 import Navbar from '../components/Navbar';
 
 const S3_CSV_URL = 'https://teamforgedata.s3.us-east-1.amazonaws.com/2025_hackathons_updated.csv';

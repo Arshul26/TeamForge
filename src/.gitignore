@@ -1,3 +1,9 @@
 node_modules
 .env
 firebase.js
+.firebaserc
+.gitignore
+cors.json
+firebase.json
+index.html
+README.md
