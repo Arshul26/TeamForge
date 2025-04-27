@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
-import { Box, Button, Input, FormControl, FormLabel, VStack, Heading, Text, useToast } from '@chakra-ui/react';
-import { auth, db } from '../firebase';
+import { Box, Button, Input, FormControl, FormLabel, VStack, Heading, Text, useToast, Image } from '@chakra-ui/react';
+import { auth, db, storage } from '../firebase'; // Make sure storage is imported
 import { doc, setDoc } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
+
 
 export default function ProfileCreate() {
   const [bio, setBio] = useState('');
   const [hackathons, setHackathons] = useState('');
   const [techStack, setTechStack] = useState([]);
   const [username, setUsername] = useState('');
+  const [profilePic, setProfilePic] = useState(null); // NEW
+  const [previewPic, setPreviewPic] = useState(null); // NEW
   const toast = useToast();
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
   const options = [
     { value: 'React', label: 'React' },
@@ -36,17 +40,35 @@ export default function ProfileCreate() {
     { value: 'Flask', label: 'Flask' },
   ];
 
+  const handleImageChange = (e) => {
+    if (e.target.files[0]) {
+      setProfilePic(e.target.files[0]);
+      setPreviewPic(URL.createObjectURL(e.target.files[0])); // Preview the selected pic
+    }
+  };
+  
+  console.log(auth.currentUser);
   const handleSubmit = async (e) => {
+    console.log('Current user:', auth.currentUser);
     e.preventDefault();
 
     try {
-      if (auth.currentUser) { // Ensure the user is logged in
+      if (auth.currentUser) {
+        let profilePicURL = '';
+
+        if (profilePic) {
+          const storageRef = ref(storage, `profilePictures/${auth.currentUser.uid}`);
+          await uploadBytes(storageRef, profilePic);
+          profilePicURL = await getDownloadURL(storageRef);
+        }
+
         const userRef = doc(db, 'users', auth.currentUser.uid);
         await setDoc(userRef, {
           username,
           bio,
           techStack: techStack.map((skill) => skill.value),
           hackathons,
+          profilePicURL, // Save the image URL too
         });
 
         toast({
@@ -57,7 +79,7 @@ export default function ProfileCreate() {
           isClosable: true,
         });
 
-        navigate('/dashboard'); // Redirect to dashboard after profile creation
+        navigate('/dashboard');
       } else {
         toast({
           title: 'Error',
@@ -68,6 +90,9 @@ export default function ProfileCreate() {
         });
       }
     } catch (error) {
+      console.error('Error saving profile:', error);
+      console.error('Full error details:', error.message);
+
       toast({
         title: 'Error',
         description: 'There was an issue saving your profile.',
@@ -86,91 +111,59 @@ export default function ProfileCreate() {
         </Heading>
 
         <FormControl>
-          <FormLabel htmlFor="username" fontSize="lg" fontWeight="bold">
-            Username
-          </FormLabel>
+          <FormLabel fontWeight="bold">Profile Picture</FormLabel>
+          <Input type="file" accept="image/*" onChange={handleImageChange} />
+          {previewPic && (
+            <Image src={previewPic} alt="Preview" boxSize="100px" objectFit="cover" mt={2} rounded="full" />
+          )}
+        </FormControl>
+
+        <FormControl>
+          <FormLabel fontWeight="bold">Username</FormLabel>
           <Input
-            id="username"
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder="Choose a username"
-            size="lg"
-            focusBorderColor="teal.500"
-            bg="white"
-            borderColor="teal.300"
           />
         </FormControl>
 
         <FormControl>
-          <FormLabel htmlFor="bio" fontSize="lg" fontWeight="bold">
-            Bio
-          </FormLabel>
+          <FormLabel fontWeight="bold">Bio</FormLabel>
           <Input
-            id="bio"
             type="text"
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            placeholder="Write a short bio about yourself..."
-            size="lg"
-            focusBorderColor="teal.500"
-            bg="white"
-            borderColor="teal.300"
+            placeholder="Write a short bio..."
           />
         </FormControl>
 
         <FormControl>
-          <FormLabel htmlFor="hackathons" fontSize="lg" fontWeight="bold">
-            Hackathons (Past Participation)
-          </FormLabel>
+          <FormLabel fontWeight="bold">Hackathons (Past Participation)</FormLabel>
           <Input
-            id="hackathons"
             type="text"
             value={hackathons}
             onChange={(e) => setHackathons(e.target.value)}
-            placeholder="Mention past hackathons (optional)"
-            size="lg"
-            focusBorderColor="teal.500"
-            bg="white"
-            borderColor="teal.300"
+            placeholder="Mention hackathons"
           />
         </FormControl>
 
         <FormControl>
-          <FormLabel htmlFor="techStack" fontSize="lg" fontWeight="bold">
-            Tech Stack (Skills)
-          </FormLabel>
+          <FormLabel fontWeight="bold">Tech Stack (Skills)</FormLabel>
           <Select
-            id="techStack"
             isMulti
             options={options}
-            onChange={(selected) => setTechStack(selected)}
             value={techStack}
-            placeholder="Select skills"
-            styles={{
-              control: (provided) => ({
-                ...provided,
-                borderColor: 'teal.300',
-                boxShadow: 'none',
-                '&:hover': { borderColor: 'teal.500' },
-              }),
-              multiValue: (provided) => ({
-                ...provided,
-                backgroundColor: 'teal.100',
-                color: 'teal.800',
-              }),
-              multiValueLabel: (provided) => ({
-                ...provided,
-                color: 'teal.800',
-              }),
-            }}
+            onChange={(selected) => setTechStack(selected)}
+            placeholder="Select your skills"
           />
         </FormControl>
 
-        <Button onClick={handleSubmit} colorScheme="teal" size="lg" width="full" _hover={{ bg: 'teal.600' }} mt={4}>
+        <Button onClick={handleSubmit} colorScheme="teal" width="full" mt={4}>
           Create Profile
         </Button>
       </VStack>
     </Box>
   );
 }
+
