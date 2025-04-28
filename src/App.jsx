@@ -7,6 +7,7 @@ import ProfileDashboard from './pages/ProfileDashboard'; // Remove the duplicate
 import AuthPage from './AuthPage'; // Assuming you have a LoginPage
 import CreateProfile from './pages/CreateProfile';
 import ProfileEdit from './pages/ProfileEdit';
+import SkillMatching from './pages/SkillMatching';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/hackathon-details" element={<HackathonDetails />} />
         <Route path="/profile" element={<ProfileDashboard />} />
         <Route path="/" element={<AuthPage />} /> {/* Default route for login */}
+        <Route path="/skill-matching" element={<SkillMatching />} />
       </Routes>
     </Router>
   );
