@@ -14,9 +14,9 @@
 
 - **Frontend:** React.js, Chakra UI
 - **State Management:** React Context / Redux (TBD)
-- **AI Matching:** Custom algorithm using NLP and preference analysis (planned)
-- **Backend:** (Coming Soon – Node.js / Express.js)
-- **Database:** (Coming Soon – MongoDB / Firebase)
+- **AI Matching:** Custom algorithm using NLP and preference analysis
+- **Backend:** (Node.js / Express.js)
+- **Database:** (DynamoDB / Firebase)
 
 ## 🚧 Getting Started
 
