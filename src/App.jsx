@@ -8,6 +8,7 @@ import AuthPage from './AuthPage'; // Assuming you have a LoginPage
 import CreateProfile from './pages/CreateProfile';
 import ProfileEdit from './pages/ProfileEdit';
 import SkillMatching from './pages/SkillMatching';
+import LandingPage from './pages/LandingPage';
 
 function App() {
   return (
@@ -19,7 +20,9 @@ function App() {
         <Route path="/hackathon-explorer" element={<HackathonExplorer />} />
         <Route path="/hackathon-details" element={<HackathonDetails />} />
         <Route path="/profile" element={<ProfileDashboard />} />
-        <Route path="/" element={<AuthPage />} /> {/* Default route for login */}
+        {/* <Route path="/" element={<AuthPage />} /> */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/auth" element={<AuthPage />} /> 
         <Route path="/skill-matching" element={<SkillMatching />} />
       </Routes>
     </Router>
@@ -27,3 +30,4 @@ function App() {
 }
 
 export default App;
+
